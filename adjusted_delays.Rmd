@@ -1,0 +1,64 @@
+---
+title: "testVBZ"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+
+```
+
+
+```{r}
+delay1 = read.csv("/Users/bgppermp/docs/zurich_data_day/data/delay_data/fahrzeitensollist2015092020150926.csv")
+```
+
+```{r}
+make_delays <- function(tibble_name,){}
+work.line <- 
+delay2 <- delay1 %>% 
+  select(linie,umlauf_von,halt_id_nach,halt_id_von,soll_ab_von,ist_ab_von,soll_an_nach,ist_an_nach1) #%>% 
+  filter(linie == work.line) %>%
+         #first calculate delays during segments of the line
+  mutate(soll_seg = soll_an_nach - soll_ab_von,
+         ist_seg = ist_an_nach - ist_ab_von,
+         delay_seg = soll_seg - ist_seg,
+         # below is the delay at the station
+         soll_at_von = soll_ab_von - soll_an_von,
+         ist_at_von = ist_ab_von - ist_an_von,
+         delay_von = ist_at_von - soll_at_von,
+         index = paste(as.character(linie),'-',as.charater(halt_punkt_id_von),'-',as.character(halt_punkt_id_nach))
+        )
+  }
+```
+
+```{r}
+names(delay1)
+```
+```{r}
+names(delay2)
+```
+```{r}
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
