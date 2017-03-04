@@ -1,7 +1,8 @@
 ---
 title: "testVBZ"
 output: html_document
-#test code
+#test code 
+library(tidyverse)
 ---
 
 ```{r setup, include=FALSE}
@@ -19,22 +20,23 @@ delay1 = read.csv("/Users/bgppermp/docs/zurich_data_day/data/delay_data/fahrzeit
 ```
 
 ```{r}
-make_delays <- function(tibble_name,){}
-work.line <- 
+#make_delays <- function(tibble_name,){
+work.line <- 33
 delay2 <- delay1 %>% 
-  select(linie,umlauf_von,halt_id_nach,halt_id_von,soll_ab_von,ist_ab_von,soll_an_nach,ist_an_nach1) #%>% 
+  select(linie,umlauf_von,halt_id_nach,halt_id_von,soll_ab_von,ist_ab_von,soll_an_nach,ist_an_nach1,
+         soll_an_von,ist_an_von,halt_punkt_id_von,halt_punkt_id_nach) %>% 
   filter(linie == work.line) %>%
          #first calculate delays during segments of the line
   mutate(soll_seg = soll_an_nach - soll_ab_von,
-         ist_seg = ist_an_nach - ist_ab_von,
+         ist_seg = ist_an_nach1 - ist_ab_von,
          delay_seg = soll_seg - ist_seg,
          # below is the delay at the station
          soll_at_von = soll_ab_von - soll_an_von,
          ist_at_von = ist_ab_von - ist_an_von,
          delay_von = ist_at_von - soll_at_von,
-         index = paste(as.character(linie),'-',as.charater(halt_punkt_id_von),'-',as.character(halt_punkt_id_nach))
+         index = paste(as.character(linie),'-',as.character(halt_punkt_id_von),'-',as.character(halt_punkt_id_nach))
         )
-  }
+#  }
 ```
 
 ```{r}
