@@ -10,7 +10,7 @@ for (i in 1:2) {  # length(files)
   for (j in 1:1) {  # length(factor(delay1$linie))
     work.line <- 33  #factor(delay1$linie)[j]
     delay2 <- delay1 %>% 
-      select(linie,umlauf_von,halt_punkt_diva_nach,halt_punkt_diva_von,soll_ab_von,ist_ab_von,soll_an_nach,ist_an_nach1,
+      select(linie,umlauf_von,halt_diva_nach,halt_diva_von,soll_ab_von,ist_ab_von,soll_an_nach,ist_an_nach1,
              soll_an_von,ist_an_von,halt_punkt_id_von,halt_punkt_id_nach, halt_kurz_von1, halt_kurz_nach1) %>% 
       filter(linie == work.line) %>%
       # first calculate delays during segments of the line
@@ -21,7 +21,7 @@ for (i in 1:2) {  # length(files)
              soll_at_von = soll_ab_von - soll_an_von,
              ist_at_von = ist_ab_von - ist_an_von,
              delay_von = ist_at_von - soll_at_von,
-             index = paste(as.character(linie),'-',as.character(halt_punkt_diva_von),'-',as.character(halt_punkt_diva_nach), sep = "")
+             index = paste(as.character(linie),'-',as.character(halt_diva_von),'-',as.character(halt_diva_nach), sep = "")
       )
   }
   data[[i]] <- delay2
