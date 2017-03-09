@@ -124,7 +124,9 @@ ggplot(data=delays_by_type, aes(x=delay)) +
   geom_histogram(data=subset(delays_by_type,Type_of_value=="stop"),aes(fill=Type_of_value),alpha=0.3,bins=20) +
   geom_histogram(data=subset(delays_by_type,Type_of_value=="seg"),aes(fill=Type_of_value),alpha=0.3,bins=20) +
   scale_fill_manual(name="Type_of_value", values = c("blue","red"),labels = c("Segments","Stops")) +
-  facet_wrap(~day.of.week, nrow = 3)
+  facet_wrap(~day.of.week, nrow = 3) +
+  ggtitle("Delays At Stops And Along Route Segments, By Day of Week") +
+  theme(plot.title = element_text(hjust = 0.5))
   
     
   
