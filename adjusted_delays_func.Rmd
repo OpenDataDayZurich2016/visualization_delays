@@ -1,6 +1,6 @@
 ---
 title: "testVBZ"
-output: html_document
+output: html_notebook
 #test code 
 ---
 
@@ -14,22 +14,54 @@ library(tidyverse)
 
 
 ```{r}
-delays <- function(small_tib,out_tib,work.line){
+#########################################################################################
+################### Delay Increments Along Route Segments and At Stops  #################
+#########################################################################################
+# This function will return a tibble (tidyverse dataframe) of the delays greater than
+# a certain integer, measured in minutes.  Minute values are rounded down from seconds.
+#  PARAMETERS:
+# small_tib -- a fahrzeitensollist .csv dataset from VBZ
+# out_tib -- the name of an empty tibble
+# work.line -- the bus or tram line of interest
+# min_delay_seg_min -- the minimum delay time for delays on route segments, in minutes
+# min_delay_von_min -- the minimum delay time for delays at the von stop
+#
+# Requires: tidyverse or dplyr library
+#
+# Contributers:  Peter B. Pearman  pbpearman@gmail.com
+#
+##########################################################################################
+# small_tib  --a VBZ delay dataset
+# out_tib    --the output dataset
+# work.line  --the tram or bus line in question
+# min_delay_seg_min --the threshold increment of additional delay on a segment
+# min_delay_von_min --the threshold increment of additional delay at the 'von' stop
+
+delays <- function(small_tib,out_tib,work.line,min_delay_seg_min,min_delay_von_min){
   small_tib$halt_kurz_nach1 <- as.character(small_tib$halt_kurz_nach1)
   small_tib$halt_kurz_von1 <- as.character(small_tib$halt_kurz_von1)
   delay2 <- small_tib %>% 
-    select(linie,umlauf_von,halt_id_nach,halt_id_von,soll_ab_von,ist_ab_von,soll_an_nach,ist_an_nach1,
+    select(linie,umlauf_von,halt_id_nach,halt_id_von,datum_von,soll_ab_von,ist_ab_von,soll_an_nach,ist_an_nach1,
          soll_an_von,ist_an_von,halt_punkt_id_von,halt_punkt_id_nach,halt_kurz_von1,halt_kurz_nach1,halt_punkt_diva_von,halt_punkt_diva_nach) %>% 
     filter(linie == work.line) %>%
-         #first calculate delays during segments of the line
+    
+         #delays during segments of the line
+    
     mutate(soll_seg = soll_an_nach - soll_ab_von,
          ist_seg = ist_an_nach1 - ist_ab_von,
          delay_seg = soll_seg - ist_seg,
-         # below is the delay at the station
+         # delay at the station
          soll_at_von = soll_ab_von - soll_an_von,
          ist_at_von = ist_ab_von - ist_an_von,
          delay_von = ist_at_von - soll_at_von)
-  out_tib <- bind_rows(delay2,out_tib)
+  
+        # now filter out lines that do not have at least one delay that is greater than the necessary minimum
+
+  delay3 <- delay2 %>%
+    mutate(delay_seg_min = floor(delay_seg/60), delay_von_min = floor(delay_von/60)) %>%
+    filter(delay_seg_min >= min_delay_seg_min | delay_von_min >= min_delay_von_min)
+  
+  out_tib <- bind_rows(delay3,out_tib)
   return(out_tib)
 }
 ```
@@ -39,19 +71,26 @@ out_tib <- tibble()
 temp=list.files('../data/fahrzeiten_data')
 work.line <- 33
 data_set=0
-num_datasets = 8
+num_datasets = 12
+min_delay_seg_min = 2
+min_delay_von_min = 2
 out_tib <- tibble()
 for (i in temp){
   data_set <- data_set + 1
   print(i)
-  delay1 <- read.csv(paste('../data/fahrzeiten_data/',i,sep=""))
-  out_tib <- delays(delay1,out_tib,work.line)
+  delay1 <- read.csv(paste('../data/fahrzeiten_data/',i,sep=""),stringsAsFactors = FALSE)
+  out_tib <- delays(delay1,out_tib,work.line,min_delay_seg_min,min_delay_von_min)
   if ((data_set>=num_datasets)==TRUE) break()
 }
+# make an index for QGIS plotting
 out_tib$index <- paste(out_tib$linie,'-',out_tib$halt_punkt_id_von,'-',out_tib$halt_punkt_id_nach,sep='')
+```
 
+```{r}
 
 ```
+
+
 
 ```{r}
 #name<-"week1-2.csv"
@@ -59,10 +98,38 @@ out_tib$index <- paste(out_tib$linie,'-',out_tib$halt_punkt_id_von,'-',out_tib$h
 ```
 
 ```{r}
-tib1 <- out_tib %>%
-         mutate(delay_seg_min = floor(delay_seg/60)) %>%
-         filter(delay_seg_min > 2)
-ggplot(data=tib1, aes(x=delay_seg_min)) +
-         geom_histogram(bins=20)
+out_tib$day.of.week <- factor(weekdays(as.POSIXct(out_tib$soll_ab_von,origin=dmy(out_tib$datum_von))),levels=c("Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"))
+```
+
+
+```{r}
+delay.seg1 <- out_tib %>%
+        #select(delay_seg_min) %>%
+        filter(delay_seg_min >= min_delay_seg_min) %>%
+        mutate(type_val = "seg") %>%
+        rename(delay = delay_seg_min, Type_of_value=type_val)
+
+delay.von1 <- out_tib %>%
+        #select(delay_von_min) %>%
+        filter(delay_von_min >= min_delay_von_min) %>%
+        mutate(type_val = "stop") %>%
+        rename(delay = delay_von_min,Type_of_value = type_val)
+
+delays_by_type <- bind_rows(delay.seg1,delay.von1)
+```
+
+```{r}
+
+ggplot(data=delays_by_type, aes(x=delay)) +
+  geom_histogram(data=subset(delays_by_type,Type_of_value=="stop"),aes(fill=Type_of_value),alpha=0.3,bins=20) +
+  geom_histogram(data=subset(delays_by_type,Type_of_value=="seg"),aes(fill=Type_of_value),alpha=0.3,bins=20) +
+  scale_fill_manual(name="Type_of_value", values = c("blue","red"),labels = c("Segments","Stops")) +
+  facet_wrap(~day.of.week, nrow = 3)
+  
+    
   
 ```
+
+
+
+
