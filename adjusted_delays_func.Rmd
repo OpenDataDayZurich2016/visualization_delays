@@ -1,14 +1,16 @@
 ---
-  title: "VBZ Delays Extraction"
-  output: html_notebook
+title: "VBZ Delays Extraction"
+output: html_document
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+#{r setup, include=TRUE}
+```{r global_options, include=TRUE}
+knitr::opts_chunk$set(include = TRUE)
 ```
 
 ```{r}
 library(tidyverse)
+library(lubridate)
 ```
 
 
@@ -65,12 +67,12 @@ delays <- function(small_tib,out_tib,work.line,min_delay_seg_min,min_delay_von_m
 }
 ```
 
-```{r}
+```{r load_data}
 out_tib <- tibble()
 temp=list.files('../data/fahrzeiten_data')
 work.line <- 33
 data_set=0
-num_datasets = 12
+num_datasets = 1
 min_delay_seg_min = 2
 min_delay_von_min = 2
 out_tib <- tibble()
@@ -90,12 +92,12 @@ out_tib$index <- paste(out_tib$linie,'-',out_tib$halt_punkt_id_von,'-',out_tib$h
 #write_csv(out_tib,name)
 ```
 
-```{r}
+```{r calculate_day_of_week}
 out_tib$day.of.week <- factor(weekdays(as.POSIXct(out_tib$soll_ab_von,origin=dmy(out_tib$datum_von))),levels=c("Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"))
 ```
 
 
-```{r}
+```{r make_output_data_for_graphing}
 delay.seg1 <- out_tib %>%
         #select(delay_seg_min) %>%
         filter(delay_seg_min >= min_delay_seg_min) %>%
@@ -111,7 +113,7 @@ delay.von1 <- out_tib %>%
 delays_by_type <- bind_rows(delay.seg1,delay.von1)
 ```
 
-```{r}
+```{r plot_data, include= TRUE, fig.width=4,fig.height=3}
 
 ggplot(data=delays_by_type, aes(x=delay)) +
   geom_histogram(data=subset(delays_by_type,Type_of_value=="stop"),aes(fill=Type_of_value),alpha=0.3,bins=20) +
