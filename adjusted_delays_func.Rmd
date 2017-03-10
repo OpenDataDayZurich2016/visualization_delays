@@ -1,7 +1,6 @@
 ---
-title: "testVBZ"
-output: html_notebook
-#test code 
+  title: "VBZ Delays Extraction"
+  output: html_document
 ---
 
 ```{r setup, include=FALSE}
@@ -85,12 +84,6 @@ for (i in temp){
 # make an index for QGIS plotting
 out_tib$index <- paste(out_tib$linie,'-',out_tib$halt_punkt_id_von,'-',out_tib$halt_punkt_id_nach,sep='')
 ```
-
-```{r}
-
-```
-
-
 
 ```{r}
 #name<-"week1-2.csv"
