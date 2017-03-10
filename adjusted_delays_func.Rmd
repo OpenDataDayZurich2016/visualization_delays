@@ -1,9 +1,8 @@
 ---
 title: "VBZ Delays Extraction"
-output: html_document
+output: html_notebook
 ---
 
-#{r setup, include=TRUE}
 ```{r global_options, include=TRUE}
 knitr::opts_chunk$set(include = TRUE)
 ```
@@ -31,12 +30,13 @@ library(lubridate)
 #
 # Contributers:  Peter B. Pearman  pbpearman@gmail.com
 #
-##########################################################################################
+#
 # small_tib  --a VBZ delay dataset
 # out_tib    --the output dataset
 # work.line  --the tram or bus line in question
 # min_delay_seg_min --the threshold increment of additional delay on a segment
 # min_delay_von_min --the threshold increment of additional delay at the 'von' stop
+########################################################################################
 
 delays <- function(small_tib,out_tib,work.line,min_delay_seg_min,min_delay_von_min){
   small_tib$halt_kurz_nach1 <- as.character(small_tib$halt_kurz_nach1)
@@ -72,7 +72,7 @@ out_tib <- tibble()
 temp=list.files('../data/fahrzeiten_data')
 work.line <- 33
 data_set=0
-num_datasets = 1
+num_datasets = 12
 min_delay_seg_min = 2
 min_delay_von_min = 2
 out_tib <- tibble()
@@ -113,7 +113,7 @@ delay.von1 <- out_tib %>%
 delays_by_type <- bind_rows(delay.seg1,delay.von1)
 ```
 
-```{r plot_data, include= TRUE, fig.width=4,fig.height=3}
+```{r plot_data, include= TRUE, result="TRUE"}
 
 ggplot(data=delays_by_type, aes(x=delay)) +
   geom_histogram(data=subset(delays_by_type,Type_of_value=="stop"),aes(fill=Type_of_value),alpha=0.3,bins=20) +
