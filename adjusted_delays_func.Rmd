@@ -1,6 +1,6 @@
 ---
   title: "VBZ Delays Extraction"
-  output: html_document
+  output: html_notebook
 ---
 
 ```{r setup, include=FALSE}
