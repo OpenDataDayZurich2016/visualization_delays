@@ -1,0 +1,316 @@
+---
+title: "testVBZ"
+output: html_notebook
+#test code 
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(lubridate)
+```
+
+
+```{r}
+#########################################################################################
+################### Delay Increments Along Route Segments and At Stops  #################
+#########################################################################################
+# This function will return a tibble (tidyverse dataframe) of the delays greater than
+# a certain integer, measured in minutes.  Minute values are rounded down from seconds.
+#  PARAMETERS:
+# small_tib -- a fahrzeitensollist .csv dataset from VBZ
+# out_tib -- the name of an empty tibble
+# work.line -- the bus or tram line of interest
+# min_delay_seg_min -- the minimum delay time for delays on route segments, in minutes
+# min_delay_von_min -- the minimum delay time for delays at the von stop
+#
+# Requires: tidyverse or dplyr library
+#
+# Contributers:  Peter B. Pearman  pbpearman@gmail.com
+#
+##########################################################################################
+# small_tib  --a VBZ delay dataset
+# out_tib    --the output dataset
+# work.line  --the tram or bus line in question
+# min_delay_seg_min --the threshold increment of additional delay on a segment
+# min_delay_von_min --the threshold increment of additional delay at the 'von' stop
+
+delays <- function(small_tib,out_tib,work.line,min_delay_seg_min,min_delay_von_min){
+  small_tib$halt_kurz_nach1 <- as.character(small_tib$halt_kurz_nach1)
+  small_tib$halt_kurz_von1 <- as.character(small_tib$halt_kurz_von1)
+  delay2 <- small_tib %>% 
+    select(linie,richtung,betriebsdatum,fahrzeug,umlauf_von,halt_id_nach,halt_id_von,datum_von,soll_ab_von,ist_ab_von,soll_an_nach,ist_an_nach1,
+         soll_an_von,ist_an_von,halt_punkt_id_von,halt_punkt_id_nach,halt_kurz_von1,halt_kurz_nach1,halt_punkt_diva_von,halt_punkt_diva_nach) %>% 
+    filter(linie == work.line) %>%
+    
+         #delays during segments of the line
+    
+    mutate(soll_seg = soll_an_nach - soll_ab_von,
+         ist_seg = ist_an_nach1 - ist_ab_von,
+         delay_seg = soll_seg - ist_seg,
+         # delay at the station
+         soll_at_von = soll_ab_von - soll_an_von,
+         ist_at_von = ist_ab_von - ist_an_von,
+         delay_von = ist_at_von - soll_at_von)
+  
+        # now filter out lines that do not have at least one delay that is greater than the necessary minimum
+
+  delay3 <- delay2 %>%
+    mutate(delay_seg_min = floor(delay_seg/60), delay_von_min = floor(delay_von/60)) %>%
+    filter(delay_seg_min >= min_delay_seg_min | delay_von_min >= min_delay_von_min)
+  
+  out_tib <- bind_rows(delay3,out_tib)
+  return(out_tib)
+}
+```
+
+```{r data_load, cache=TRUE, autodep=TRUE}
+out_tib <- tibble()
+temp=list.files('../data/fahrzeiten_data')
+work.line <- 33
+data_set=0
+num_datasets = 12
+min_delay_seg_min = 2
+min_delay_von_min = 2
+out_tib <- tibble()
+for (i in temp){
+  data_set <- data_set + 1
+  print(i)
+  delay1 <- read.csv(paste('../data/fahrzeiten_data/',i,sep=""),stringsAsFactors = FALSE)
+  out_tib <- delays(delay1,out_tib,work.line,min_delay_seg_min,min_delay_von_min)
+  if ((data_set>=num_datasets)==TRUE) break()
+}
+# make an index for QGIS plotting
+out_tib$index <- paste(out_tib$linie,'-',out_tib$halt_punkt_id_von,'-',out_tib$halt_punkt_id_nach,sep='')
+```
+
+```{r}
+head(out_tib)
+
+```
+
+
+
+```{r}
+dim(out_tib)
+```
+
+```{r}
+out_tib$day.of.week <- factor(weekdays(as.POSIXct(out_tib$soll_ab_von,origin=dmy(out_tib$datum_von))),levels=c("Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"))
+# out_tib$soll_ab_von,origin=dmy(out_tib$datum_von)
+```
+
+
+```{r}
+delay.seg1 <- out_tib %>%
+        #select(delay_seg_min) %>%
+        filter(delay_seg_min >= min_delay_seg_min, halt_kurz_nach1 != "GAR6", halt_kurz_von1 != "GAR6") %>%
+        mutate(type_val = "seg") %>%
+        rename(delay = delay_seg_min, Type_of_value=type_val)
+
+delay.von1 <- out_tib %>%
+        #select(delay_von_min) %>%
+        filter(delay_von_min >= min_delay_von_min, halt_kurz_von1 != "GAR6", halt_kurz_nach1 != "GAR6") %>%
+        mutate(type_val = "stop") %>%
+        rename(delay = delay_von_min,Type_of_value = type_val)
+
+delays_by_type <- bind_rows(delay.seg1,delay.von1)
+```
+```{r}
+sum(delays_by_type$halt_kurz_von1 == "GAR6")
+```
+
+
+```{r}
+
+ggplot(data=delays_by_type, aes(x=delay)) +
+  geom_histogram(data=subset(delays_by_type,Type_of_value=="stop"),aes(fill=Type_of_value),alpha=0.3,bins=20) +
+  geom_histogram(data=subset(delays_by_type,Type_of_value=="seg"),aes(fill=Type_of_value),alpha=0.3,bins=20) +
+  scale_fill_manual(name="Type_of_value", values = c("blue","red"),labels = c("Segments","Stops")) +
+  facet_wrap(~day.of.week, nrow = 3) +
+  ggtitle("Delays At Stops And Along Route Segments, By Day of Week") +
+  theme(plot.title = element_text(hjust = 0.5))
+  
+    
+  
+```
+
+```{r}
+station.data <- read_csv("../data/other_data/stations_2016.csv")
+haltstellen <- read_csv("../data/other_data/HALTESTELLEN_2014.csv")
+```
+### The following lines extract all the stations that were in use in the first 52 weekly delay data sets.  Then, a bunch of datasets are constructed to hold the delay data for each line, organized by magnitude of delay.  These dataset are then filled in code in adjusted_stop_delays.Rmd
+
+```{r}
+stations <- station.data %>%
+  group_by(halt_kurz) %>%
+  summarize(lat = mean(GPS_Latitude,na.rm=TRUE), lon = mean(GPS_Longitude,na.rm=TRUE))
+
+```
+
+```{r}
+haltstellen.latlon <- left_join(haltstellen,stations, by = c("Haltestellenkurzname" = "halt_kurz"))
+```
+```{r}
+test.week.name1 <- "../data/fahrzeiten_data/fahrzeitensollist2015092020150926.csv"
+test.week.name25 <- "../data/fahrzeiten_data/fahrzeitensollist2016030620160312.csv"
+```
+
+### A function to extract the names of the stations and expand a vector with new names
+```{r}
+make_haltstelle_list <- function(test.week.name,names_vec){
+  test.week <- read_csv(test.week.name)
+  haltstelle <- test.week %>%
+                group_by(halt_kurz_von1) %>%
+                summarize()
+  names_vec <- c(names_vec,haltstelle$halt_kurz_von1[!(haltstelle$halt_kurz_von1 %in% names_vec)])
+  return(names_vec)
+}
+```
+
+```{r}
+names_vec <- character()
+```
+#### Go through all the delay data sets and extract all the observed station names
+```{r get_stop_name_list, results="hide"}
+names_vec <- character()
+temp=list.files('../data/fahrzeiten_data')
+for (i in temp){
+  names_vec <- make_haltstelle_list(paste("../data/fahrzeiten_data/",i,sep=''),names_vec)
+}
+```
+#### Make a tibble with the names of the stations in the delays data sets
+```{r}
+station.names <- tibble(stations=names_vec)
+```
+#### Do an inner join to attach lat lon to those stations, removing stations without lat lon values
+```{r}
+station.names.lat.lon <- inner_join(station.names,stations,by = c("stations" = "halt_kurz"))
+```
+#### Extract the line numbers of all lines in several 2015-2016 delay data sets
+
+```{r}
+make_line_list <- function(test.week.name,names_vec){
+  test.week <- as_tibble(read.csv(test.week.name))
+  values <- test.week %>%
+                #mutate(linie.char = as.character(linie)) %>%
+                group_by(linie) %>%
+                summarize()
+  names_vec <- c(names_vec,values$linie[!(values$linie %in% names_vec)])
+  return(names_vec)
+}
+```
+
+```{r}
+unique.lines <- numeric()
+temp=list.files('../data/fahrzeiten_data')
+data2extract <- c(1,20,30)
+for (i in data2extract) {
+  dname<- paste('../data/fahrzeiten_data/',temp[i],sep = "")
+  unique.lines <- make_line_list(dname,unique.lines)
+}
+```
+
+```{r}
+lines.stops <- vector("list",length(unique.lines))
+names(lines.stops) <- as.character(unique.lines)
+for (i in unique.lines){
+  eval(parse(text=paste("stops <- unique(test.week$halt_kurz_von1[which((test.week$linie==",i,")==TRUE)])",sep='')))
+  lines.stops[[which(names(lines.stops)==as.character(i))]] <- list(stops=stops)
+}
+```
+
+```{r}
+for (i in unique.lines) {
+  stops.1 <- as.character(eval(parse(text=paste("lines.stops[['",i,"']]",sep='')))$stops)
+  data.one <- tibble(stops = stops.1,
+                     line = rep(as.character(i),length(stops.1)),
+                     del_1_1 = rep(0,length(stops.1)),
+                     del_1_2 = rep(0,length(stops.1)),
+                     del_2_1 = rep(0,length(stops.1)),
+                     del_2_2 = rep(0,length(stops.1)),
+                     del_3_1 = rep(0,length(stops.1)),
+                     del_3_2 = rep(0,length(stops.1)),
+                     del_4_1 = rep(0,length(stops.1)),
+                     del_4_2 = rep(0,length(stops.1)),
+                     del_5_1 = rep(0,length(stops.1)),
+                     del_5_2 = rep(0,length(stops.1)),
+                     del_6_1 = rep(0,length(stops.1)),
+                     del_6_2 = rep(0,length(stops.1))
+                     )
+
+  fname <- paste("../data/stop_delays/stops_delays_52_weeks_line_",i,".csv",sep='')
+  write_csv(data.one,fname)
+}
+```
+```{r}
+
+```
+
+
+
+
+```{r}
+conditions <- c()
+for (i in 1:52) {
+  
+}
+```
+
+
+
+
+
+
+```{r}
+delays_lat_lon <- left_join(delays_by_type,stations, by= c("halt_kurz_von1" = "halt_kurz"))
+names(delays_lat_lon)
+```
+
+```{r}
+ stop_delays_lat_lon <- delays_lat_lon %>%
+  filter(Type_of_value == "stop",richtung==2) %>%
+  group_by(halt_kurz_von1,lat,lon) %>% 
+  summarize(count=n(), total_delay = sum(delay)) %>%
+  filter(total_delay < 100)
+
+
+```
+
+```{r}
+stops_2 <- stop_delays_lat_lon$halt_kurz_von1
+```
+
+```{r}
+stops_2 %in% stops_1
+```
+
+
+```{r}
+head(stop_delays_lat_lon)
+```
+```{r}
+stop_delays_lat_lon[stop_delays_lat_lon$halt_kurz_von1=="GAR6",]
+```
+
+
+```{r}
+ggplot(data = stop_delays_lat_lon,aes(x=total_delay)) +
+  geom_histogram(bins=5)
+```
+
+```{r}
+as.data.frame(stop_delays_lat_lon$total_delay)
+```
+
+
+```{r}
+ggplot(data = stop_delays_lat_lon, aes(lon,lat,fill=total_delay)) +
+  geom_point(shape=21,size=3) +
+  coord_quickmap()
+  
+```
+
