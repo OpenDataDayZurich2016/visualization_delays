@@ -139,8 +139,13 @@ ggplot(data=delays_by_type, aes(x=delay)) +
 ```
 
 ```{r}
-station.data <- read_csv("../data/other_data/stations_2016.csv")
-haltstellen <- read_csv("../data/other_data/HALTESTELLEN_2014.csv")
+station.data1 <- read_csv("../data/other_data/stations_2015.csv")
+station.data2 <- read_csv("../data/other_data/stations_2016.csv")
+station.data3 <- read_csv("../data/other_data/stations_2017.csv")
+station.data <- bind_rows(station.data1,station.data2,station.data3) %>%
+  distinct(halt_punkt_id,.keep_all=TRUE)
+
+haltstellen1 <- read_csv("../data/other_data/HALTESTELLEN_2014.csv")
 ```
 ### The following lines extract all the stations that were in use in the first 52 weekly delay data sets.  Then, a bunch of datasets are constructed to hold the delay data for each line, organized by magnitude of delay.  These dataset are then filled in code in adjusted_stop_delays.Rmd
 
@@ -151,44 +156,72 @@ stations <- station.data %>%
 
 ```
 
+### Which and how many halt_kurz names are in the 2014 .csv file but not in the 2015 - 2017 .csv files?
 ```{r}
-haltstellen.latlon <- left_join(haltstellen,stations, by = c("Haltestellenkurzname" = "halt_kurz"))
+haltstellen2 <- haltstellen1 %>%
+  filter(!(haltstellen1$Haltestellenkurzname %in% unique(stations$halt_kurz))) %>%
+  rename(halt_kurz = Haltestellenkurzname)
+(dim(haltstellen2))
+head(haltstellen2)
 ```
+#### How many stations are in the delay data sets?
 ```{r}
-test.week.name1 <- "../data/fahrzeiten_data/fahrzeitensollist2015092020150926.csv"
-test.week.name25 <- "../data/fahrzeiten_data/fahrzeitensollist2016030620160312.csv"
-```
-
-### A function to extract the names of the stations and expand a vector with new names
-```{r}
-make_haltstelle_list <- function(test.week.name,names_vec){
-  test.week <- read_csv(test.week.name)
-  haltstelle <- test.week %>%
-                group_by(halt_kurz_von1) %>%
-                summarize()
-  names_vec <- c(names_vec,haltstelle$halt_kurz_von1[!(haltstelle$halt_kurz_von1 %in% names_vec)])
-  return(names_vec)
-}
+length(unique(station.data$halt_kurz))
 ```
 
+#### How many stations are in the delay datasets and in the 2014 list of stations?
 ```{r}
-names_vec <- character()
+sum(unique(station.data$halt_kurz) %in% haltstellen1$Haltestellenkurzname)
+```
+#### Are all the stations in the 2014 station list also in the delay datasets?
+```{r}
+sum(haltstellen1$Haltestellenkurzname %in% unique(station.data$halt_kurz))
+```
+#### No, evidently about 21 do not show up in the delay datasets
+
+
+```{r}
+#haltstellen.latlon <- left_join(haltstellen1,stations, by = c("halt_kurz" = "halt_kurz"))
+haltstellen.latlon <- stations
+```
+
+
+
+#### A function to extract the names of the stations and expand a vector with new names
+#### NOT RUN
+```{r}
+#make_haltstelle_list <- function(test.week.name,names_vec){
+#  test.week <- read_csv(test.week.name)
+#  haltstelle <- test.week %>%
+#                group_by(halt_kurz_von1) %>%
+#                summarize()
+#  names_vec <- c(names_vec,haltstelle$halt_kurz_von1[!(haltstelle$halt_kurz_von1 %in% names_vec)])
+#  return(names_vec)
+#}
+```
+
+```{r}
+#names_vec <- character()
 ```
 #### Go through all the delay data sets and extract all the observed station names
-```{r get_stop_name_list, results="hide"}
-names_vec <- character()
-temp=list.files('../data/fahrzeiten_data')
-for (i in temp){
-  names_vec <- make_haltstelle_list(paste("../data/fahrzeiten_data/",i,sep=''),names_vec)
-}
+#### NOT RUN
+```{r get_stop_name_list}
+#names_vec <- character()
+#temp=list.files('../data/fahrzeiten_data')
+#for (i in temp){
+#  names_vec <- make_haltstelle_list(paste("../data/fahrzeiten_data/",i,sep=''),names_vec)
+#}
 ```
 #### Make a tibble with the names of the stations in the delays data sets
+#### NOT RUN
 ```{r}
-station.names <- tibble(stations=names_vec)
+#station.names <- tibble(stations=names_vec)
 ```
 #### Do an inner join to attach lat lon to those stations, removing stations without lat lon values
 ```{r}
-station.names.lat.lon <- inner_join(station.names,stations,by = c("stations" = "halt_kurz"))
+# station.names.lat.lon <- inner_join(station.names,stations,by = c("stations" = "halt_kurz"))
+# write_csv(station.names.lat.lon,"../data/other_data/station_names_lat_lon.csv")
+write_csv(haltstellen.latlon,"../data/other_data/station_names_lat_lon.csv")
 ```
 #### Extract the line numbers of all lines in several 2015-2016 delay data sets
 
@@ -212,7 +245,24 @@ for (i in data2extract) {
   dname<- paste('../data/fahrzeiten_data/',temp[i],sep = "")
   unique.lines <- make_line_list(dname,unique.lines)
 }
+unique.lines.c <- as.character(unique.lines)
+unique.lines.tib <- tibble(nums = seq(1,length(unique.lines.c)),
+                       lines = unique.lines.c)
+write_csv(unique.lines.tib,"../data/other_data/unique_lines.csv")
 ```
+
+```{r}
+w1 <- paste('../data/fahrzeiten_data/',temp[1],sep = "")
+w20 <- paste('../data/fahrzeiten_data/',temp[20],sep = "")
+w30 <- paste('../data/fahrzeiten_data/',temp[30],sep = "")
+week1 <- as_tibble(read.csv(w1,stringsAsFactors = FALSE))
+week20 <- as_tibble(read.csv(w20,stringsAsFactors = FALSE))
+week30 <- as_tibble(read.csv(w30,stringsAsFactors = FALSE))
+test.week <- bind_rows(week1,week20,week30)
+
+
+```
+
 
 ```{r}
 lines.stops <- vector("list",length(unique.lines))
@@ -226,6 +276,7 @@ for (i in unique.lines){
 ```{r}
 for (i in unique.lines) {
   stops.1 <- as.character(eval(parse(text=paste("lines.stops[['",i,"']]",sep='')))$stops)
+  print(paste("the numer of stops for line ",i," is ",length(stops.1),sep=''))
   data.one <- tibble(stops = stops.1,
                      line = rep(as.character(i),length(stops.1)),
                      del_1_1 = rep(0,length(stops.1)),
@@ -251,66 +302,4 @@ for (i in unique.lines) {
 ```
 
 
-
-
-```{r}
-conditions <- c()
-for (i in 1:52) {
-  
-}
-```
-
-
-
-
-
-
-```{r}
-delays_lat_lon <- left_join(delays_by_type,stations, by= c("halt_kurz_von1" = "halt_kurz"))
-names(delays_lat_lon)
-```
-
-```{r}
- stop_delays_lat_lon <- delays_lat_lon %>%
-  filter(Type_of_value == "stop",richtung==2) %>%
-  group_by(halt_kurz_von1,lat,lon) %>% 
-  summarize(count=n(), total_delay = sum(delay)) %>%
-  filter(total_delay < 100)
-
-
-```
-
-```{r}
-stops_2 <- stop_delays_lat_lon$halt_kurz_von1
-```
-
-```{r}
-stops_2 %in% stops_1
-```
-
-
-```{r}
-head(stop_delays_lat_lon)
-```
-```{r}
-stop_delays_lat_lon[stop_delays_lat_lon$halt_kurz_von1=="GAR6",]
-```
-
-
-```{r}
-ggplot(data = stop_delays_lat_lon,aes(x=total_delay)) +
-  geom_histogram(bins=5)
-```
-
-```{r}
-as.data.frame(stop_delays_lat_lon$total_delay)
-```
-
-
-```{r}
-ggplot(data = stop_delays_lat_lon, aes(lon,lat,fill=total_delay)) +
-  geom_point(shape=21,size=3) +
-  coord_quickmap()
-  
-```
 
