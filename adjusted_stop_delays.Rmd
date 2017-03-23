@@ -1,16 +1,104 @@
 ---
-title: "R Notebook"
+title: "Tables of adjusted stop delays"
 output: html_notebook
 ---
 
-This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+```{r}
+library(tidyverse)
+library(lubridate)
+```
+### This code takes the .csv files that were constructed in adjusted_delays_further.Rmd and fills them with the count of the number of delays greater than several increasingly large threshold values.  One must specify the number of weeks of delay data one would like to use, and the values of the delay thresholds in minutes.
 
-Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*. 
+#### The function delays() extracts the delay increment at each haltstelle, for each time that a vehicle stops at the haltstelle.  
 
 ```{r}
-plot(cars)
+#########################################################################################
+################### Delay Increments At Stops  #################
+#########################################################################################
+# This function will return a tibble (tidyverse dataframe) of the delays greater than
+# a certain integer, measured in minutes.  Minute values are rounded down from seconds.
+#  PARAMETERS:
+# small_tib -- a fahrzeitensollist .csv dataset from VBZ
+# out_tib -- the name of an empty tibble
+# work.line -- the bus or tram line of interest
+# min_delay_von_min -- the minimum delay time for delays at the von stop
+#
+# Requires: tidyverse or dplyr library
+#
+# Contributers:  Peter B. Pearman  pbpearman@gmail.com
+#
+##########################################################################################
+# small_tib  --a VBZ delay dataset
+# out_tib    --the output dataset
+# work.line  --the tram or bus line in question
+# min_delay_seg_min --the threshold increment of additional delay on a segment
+# min_delay_von_min --the threshold increment of additional delay at the 'von' stop
+
+delays <- function(small_tib,work.line,direction,min_delay_von_min){
+  small_tib$halt_kurz_von1 <- as.character(small_tib$halt_kurz_von1)
+  delay2 <- small_tib %>%                                   #This is left selecting most variables to ease further development
+    
+        # delay at the station
+    
+    mutate(soll_at_von = soll_ab_von - soll_an_von,
+         ist_at_von = ist_ab_von - ist_an_von,
+         delay_von_min = (ist_at_von - soll_at_von)/60) %>%
+  
+                                            # now filter out lines that do not have at least one delay that is greater than the necessary minimum
+    filter(delay_von_min >= min_delay_von_min, linie == work.line, richtung == direction)  
+                                            # Could this be developed with a eval(parse(text=paste())) to filter on a condition
+                                            # that is supplied to the function as a string argument?
+  return(delay2)
+}
 ```
 
-Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Cmd+Option+I*.
+#### The nested loops below cycle through the weekly delay dataset names in *temp*, which is a vector of strings, the lines in *worklines*, each direction, and each stop (the rows in the tibble *outfile*) and updates the additional number of delays greater than the threshold for each stop for the line. There is a separate *outfile* for each line, which is saved.  The *outfile* data sets are constructed using the code in adjusted_delays_further.Rmd, which is also in this repository.
 
-When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Cmd+Shift+K* to preview the HTML file).
+
+```{r data_load, cache=TRUE, autodep=TRUE}
+temp <- list.files('../data/fahrzeiten_data')
+temp <- temp[1:52]      # the delay data set relative names
+work.lines <- read_csv("../data/other_data/unique_lines.csv")  # a data set of the lines
+min_delay_von_min = c(1.5,2,3,4,5,6)  #thresholds to use, currently 6 in number
+data2 <- tibble()    # a summarized group_by object that has been filtered using a delay threshold
+out_tib <- tibble()  #the data set for a line in which the number of delays at each stop and threshold is tallied
+for (i in temp){
+  print(i)
+  small_tib <- as_tibble(read.csv(paste('../data/fahrzeiten_data/',i,sep=""),stringsAsFactors = FALSE))
+  for (work.line in work.lines$lines) {
+    outfile <- paste("../data/stop_delays/stops_delays_52_weeks_line_",work.line,".csv",sep='')
+    
+    #sink1 <- file(description = "messages.txt",open="a")
+    #sink(file=sink1,append=TRUE)
+    #sink(sink1,type="message",append = TRUE)
+    print(outfile)
+    out_tib <- read_csv(outfile,col_types = cols())
+    for (direction in c(1,2)) {
+      for (min1 in min_delay_von_min) {
+       data2 <- delays(small_tib,work.line,direction,min_delay_von_min = min1) %>%
+         group_by(halt_kurz_von1) %>%
+         summarize(num_delays = n())
+       if ((dim(data2)[1]==0)==TRUE) break
+       #print(c(data2$num_delays,data2$halt_kurz_von1))
+       if ((min1 == 1.5)==TRUE) min1 <- 1
+       for (k in 1:length(data2$halt_kurz_von1)) {
+         colnam <- paste("del_",min1,"_",direction,sep="")
+         a <- out_tib[[colnam]][which(out_tib$stops==data2$halt_kurz_von1[k])]
+         b <- data2$num_delays[k]
+         out_tib[[colnam]][which(out_tib$stops==data2$halt_kurz_von1[k])] <- a + b 
+       }
+      }
+    }
+    #sink(type="message")
+    #sink()
+    #close(sink1)
+    write_csv(out_tib,outfile)
+  }
+}
+
+
+```
+```{r}
+head(out_tib)
+```
+
