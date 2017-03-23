@@ -180,7 +180,7 @@ sum(haltstellen1$Haltestellenkurzname %in% unique(station.data$halt_kurz))
 #### No, evidently about 21 do not show up in the delay datasets
 
 
-```{r}
+```{r not_run1}
 #haltstellen.latlon <- left_join(haltstellen1,stations, by = c("halt_kurz" = "halt_kurz"))
 haltstellen.latlon <- stations
 ```
@@ -189,7 +189,7 @@ haltstellen.latlon <- stations
 
 #### A function to extract the names of the stations and expand a vector with new names
 #### NOT RUN
-```{r}
+```{r not_run2}
 #make_haltstelle_list <- function(test.week.name,names_vec){
 #  test.week <- read_csv(test.week.name)
 #  haltstelle <- test.week %>%
@@ -217,7 +217,7 @@ haltstellen.latlon <- stations
 ```{r}
 #station.names <- tibble(stations=names_vec)
 ```
-#### Do an inner join to attach lat lon to those stations, removing stations without lat lon values
+#### write the extracted station names and their lat lons
 ```{r}
 # station.names.lat.lon <- inner_join(station.names,stations,by = c("stations" = "halt_kurz"))
 # write_csv(station.names.lat.lon,"../data/other_data/station_names_lat_lon.csv")
