@@ -1,6 +1,6 @@
 ---
 title: "Tables of adjusted stop delays"
-output: html_notebook
+output: html_notebook 
 ---
 
 ```{r}
