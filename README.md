@@ -16,6 +16,20 @@
 
 <p>06.04.2017  The file map.nb.html contains a notebook with code to make html widgets for lines that are represented in datasets that were created by the file adjusted<em>stop</em>delays.nb.html</p>
 
-<p>The distribution of counts of delays greater than 1.5 minutes on each of several lines represented below:</p>
+<p>07.04.2017  Upload of html files, zipped html map widgets, map.Rmd source file.</p>
 
-<p><a href="https://github.com/OpenDataDayZurich2016/visualization_delays/line_2.html">Line 2</a></p>
+<p>Files with .np.html can be imported into RStudio for further work</p>
+
+<p>The raw delay data are available <a href="https://data.stadt-zuerich.ch/dataset?sort=score+desc%2C+metadata_modified+desc&amp;tags=vbz">here</a></p>
+
+<h4>==============================================================</h4>
+
+<p>adjusted_delays_func.nb.html executes an initial analysis to compare the frequency of delays at stops and along segments between stops.</p>
+
+<p>adjusted_delays_further.nb.html executes additional code to construct .csv files for each route. </p>
+
+<p>adjusted_stop_delays.nb.html tallies the number of delays during 52 weeks of data, for thresholds of 1.5, 2, 3, 4, 5, and 6 minutes or more.  It also extracts all stops from the available data files from three years, and joins coordinate data for each stop appropriately.</p>
+
+<p>map.nb.html reads the files constructed by the previous script and creates Leaflet html map widgets for several selected tram and bus lines.</p>
+
+<p>html_map_widgets_and_report.zip has obvious contents</p>

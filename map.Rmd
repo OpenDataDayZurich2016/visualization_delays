@@ -1,0 +1,116 @@
+---
+title: "Visualize Transit Delay Data"
+output:
+  html_document: default
+---
+
+#### This visualization was initiated at the Open Data Day Hackathon in Zürich, 4 March 2017.
+
+#### The original delay data come from data collected by the Verkehrsbetriebe Zürich (VBZ) and are available pubically from the Open Data Portal of [Stadt Zürch Open Data](https://data.stadt-zuerich.ch/dataset?sort=score+desc%2C+metadata_modified+desc&tags=vbz)
+
+#### You can find the source code and other files [here](https://github.com/OpenDataDayZurich2016/visualization_delays)
+
+#### The data represent the number of delays greater than the stated threshold.  The delays are tallied based on the increment in delay that occurred at a stop, independent of whether the vehicle arrived at the stop on time or not.  Negative delays, in which a vehicle stayed at a stop for less than the planned elapsed time, and thereby made headway on the schedule, were not counted.  
+
+#### The source code can be easily modified to count delays greater than a threshold in both directions, or use a higher threshold, in minute increments, up to six minutes.  All maps show data for one direction only.
+
+### ==================================================================
+
+```{r include=FALSE}
+library(tidyverse)
+library(lubridate)
+library(leaflet)
+library(htmlwidgets)
+library(htmltools)
+```
+
+```{r, include=FALSE}
+lines <- c(2,7,9,10,14,33,72)
+
+popup=c("stops","halt_lang")
+
+# addtiles() function fix found here: https://github.com/rstudio/leaflet/issues/192
+addTiles2 = function (map, urlTemplate = "http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+attribution = NULL, layerId = NULL, group = NULL, options = tileOptions())
+{
+options$attribution = attribution
+if (missing(urlTemplate) && is.null(options$attribution))
+options$attribution = paste("© OpenStreetMap",
+"contributors, CC-BY-SA")
+invokeMethod(map, getMapData(map), "addTiles", urlTemplate,
+layerId, group, options)
+}
+
+# This loop creates and saves a widget for each dataset specified in 'lines'
+for (i in lines){
+  df <- read_csv(paste('../data/stop_delays/stops_delays_52_weeks_line_',i,'.csv',sep='')) %>%
+    filter(!stops %in% c('DEP2','DEP4','DEP7','DEP8','GAR6','FRAF07')) %>%
+    mutate(content = paste(stops,halt_lang,'count =',del_1_1,sep=" "))
+  
+  pal <- colorBin(palette = "Reds", domain=df$del_1_1, 6, pretty = FALSE)
+
+  m <- leaflet(df) %>% addTiles2() %>% setView(lng=8.5402,lat=47.3778,zoom=12) %>%
+    addCircles(~lon,~lat,label = ~content, #~htmlEscape(content) # popup= ~halt_lang, goes in addCircles
+             radius = 150, stroke=TRUE,color="Black",weight=1, fillColor = pal(df$del_1_1),
+             fillOpacity = 0.8) %>%
+    addLabelOnlyMarkers(~lon,~lat,label = ~content)
+    
+  m <- m %>%
+    addLegend("bottomright", pal=pal, values= ~del_1_1, title = 'Delays > 1.5 min', opacity =0.8)
+
+  saveWidget(widget = m, file= paste("./line_",i,".html",sep=''),selfcontained = TRUE)
+  eval(parse(text = paste('m_',i,'<- m',sep='')))
+}
+```
+## Which Tram Stops have more delays?
+## Here are data for Tram 2
+```{r echo = FALSE}
+m_2
+```
+
+
+
+## Tram 7 Number of Delays
+### Greater that 1.5 minutes
+
+```{r echo= FALSE}
+m_7
+```
+
+## Tram 9 Number of Delays
+
+### Greater than 1.5 minutes
+
+
+```{r echo = FALSE}
+m_9
+```
+
+## Tram 10 Number of Delays
+
+### Greater than 1.5 minutes
+```{r echo = FALSE}
+m_10
+```
+
+## Tram 14 Number of Delays
+
+### Greater than 1.5 minutes
+```{r echo = FALSE}
+m_14
+```
+
+## Bus 33 Number of Delays
+
+### Greater than 1.5 minutes
+```{r echo = FALSE}
+m_33
+```
+
+## Bus 72 Number of Delays
+
+### Greater than 1.5 minutes
+```{r echo = FALSE}
+m_72
+```
+
