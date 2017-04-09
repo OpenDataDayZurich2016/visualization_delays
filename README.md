@@ -17,7 +17,7 @@
 
 <h3>Line 2</h3>
 
-<p>(https://github.com/OpenDataDayZurich2016/visualization<em>delaysvisualization</em>delays/maps<em>png/line</em>2.png)</p>
+<p>(https://github.com/OpenDataDayZurich2016/visualization_delays/maps_png/line_2.png)</p>
 
 <p>20.03.2017  adjusted_delays_further.Rmd provides code to go through 52 weeks of data and extract the stops that are relevant for each line.  It also creates a bunch of empty .csv files for filling with delay data.
             text version of readme now provided to ease updating by other contributers</p>
