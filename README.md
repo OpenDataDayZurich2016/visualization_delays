@@ -15,25 +15,40 @@
 
 <p>The map widgets have mouse-over labels that indicate the name of the tram or bus stop and the number of delays that occurred over 52 weeks.  Currently, data for only one direction are shown, and with a threshold of 1.5 minutes.</p>
 
-<p><p align=“justify”
-<em>Line 10</em>
-</>
-<img src="https://github.com/OpenDataDayZurich2016/visualization_delays/blob/master/maps_png/line_10.png?raw=true" alt="Stop Delays" title=""></p>
+<h2>Interactive Maps of Delays Counts at Stops</h2>
+
+<p><a href="https://rawgit.com/OpenDataDayZurich2016/visualization_delays/master/html_map_widgets_and_report/line_2.html">Line 2</a></p>
+
+<p><a href="https://rawgit.com/OpenDataDayZurich2016/visualization_delays/master/html_map_widgets_and_report/line_7.html">Line 7</a></p>
+
+<p><a href="https://rawgit.com/OpenDataDayZurich2016/visualization_delays/master/html_map_widgets_and_report/line_10.html">Line 10</a></p>
+
+<p><a href="https://rawgit.com/OpenDataDayZurich2016/visualization_delays/master/html_map_widgets_and_report/line_14.html">Line 14</a></p>
+
+<p><a href="https://rawgit.com/OpenDataDayZurich2016/visualization_delays/master/html_map_widgets_and_report/line_33.html">Line 33</a></p>
+
+<p><a href="https://rawgit.com/OpenDataDayZurich2016/visualization_delays/master/html_map_widgets_and_report/line_72.html">Line 72</a></p>
+
+<h3>Modifications</h3>
 
 <p>20.03.2017  adjusted_delays_further.Rmd provides code to go through 52 weeks of data and extract the stops that are relevant for each line.  It also creates a bunch of empty .csv files for filling with delay data.
-            text version of readme now provided to ease updating by other contributers</p>
+            text version of readme now provided to ease updating by other contributors</p>
 
-<p>23.03.2017 The notebood file adjusted_stop_delays.Rmd tallies the number of delays greater than each of a series of six threshold values in minutes.  It puts these values in a data set specific to a single bus or tram line.  One can specify the values of the thresholds and the number of weeks of delay data for which one wants to extract the number of delays. It requires that a file exists for each line, as created by adjusted_delays_further.Rmd</p>
+<p>23.03.2017 The notebook file adjusted_stop_delays.Rmd tallies the number of delays greater than each of a series of six threshold values in minutes.  It puts these values in a data set specific to a single bus or tram line.  One can specify the values of the thresholds and the number of weeks of delay data for which one wants to extract the number of delays. It requires that a file exists for each line, as created by adjusted_delays_further.Rmd</p>
 
 <p>06.04.2017  The file map.nb.html contains a notebook with code to make html widgets for lines that are represented in datasets that were created by the file adjusted<em>stop</em>delays.nb.html</p>
 
 <p>07.04.2017  Upload of html files, zipped html map widgets, map.Rmd source file.</p>
+
+<p>09.04.2017  Upload of widgets, README.md</p>
 
 <p>Files with .np.html can be imported into RStudio for further work</p>
 
 <p>The raw delay data are available <a href="https://data.stadt-zuerich.ch/dataset?sort=score+desc%2C+metadata_modified+desc&amp;tags=vbz">here</a></p>
 
 <h4>==============================================================</h4>
+
+<h3>Code guide</h3>
 
 <p>adjusted_delays_func.nb.html executes an initial analysis to compare the frequency of delays at stops and along segments between stops.</p>
 
