@@ -15,9 +15,10 @@
 
 <p>The map widgets have mouse-over labels that indicate the name of the tram or bus stop and the number of delays that occurred over 52 weeks.  Currently, data for only one direction are shown, and with a threshold of 1.5 minutes.</p>
 
-<p>-> <em>title here</em> &lt;-</p>
-
-<p><img src="https://github.com/OpenDataDayZurich2016/visualization_delays/blob/master/maps_png/line_10.png?raw=true" alt="Stop Delays" title=""></p>
+<p><p align=“justify”
+<em>Line 10</em>
+</>
+<img src="https://github.com/OpenDataDayZurich2016/visualization_delays/blob/master/maps_png/line_10.png?raw=true" alt="Stop Delays" title=""></p>
 
 <p>20.03.2017  adjusted_delays_further.Rmd provides code to go through 52 weeks of data and extract the stops that are relevant for each line.  It also creates a bunch of empty .csv files for filling with delay data.
             text version of readme now provided to ease updating by other contributers</p>
