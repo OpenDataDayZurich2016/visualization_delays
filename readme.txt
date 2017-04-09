@@ -1,5 +1,5 @@
-Visualization of Delays
-=======================
+Visualization of Delays in Verkehrsbetriebe Zürich (VBZ) Data
+=============================================================
 
 This repository collects code that was begun at ODD 2017 Zürich and has undergone subsequent elaboration and developement.
 
@@ -8,9 +8,9 @@ It is connected to:
 * [Issue #11 Visualisation of vehicle delays](https://github.com/OpenDataDayZurich2016/ideas/issues/11) and
 * [Issue #2 Visualization (map) of delay-causing streets](https://github.com/OpenDataDayZurich2016/ideas/issues/2)
 
-### There are two ways that delays can accumulate during the course of a vehicle’s trip on a route.  A delay can occur between stops, or a delay can occur at a stop.  We plotted the frequency of cases where the scheduled time between stops and the scheduled time at stops was exceeded by more than 1.5 minutes.  We found that the vast majority of cases where schedules were exceeded was at the stops themselves.  We then created scripts and functions to visualise the stops in regard to the number of delays greater than an arbitrary threshold, over the course of 52 weeks. These were output as Leaflet javascript map widgets.
+### There are two ways that delays can accumulate during the course of a vehicle’s trip on a route.  A delay can occur between stops, or a delay can occur at a stop.  We plotted the frequency of cases where the scheduled time between stops and the scheduled time at stops was exceeded by more than 1.5 minutes.  We found that the vast majority of cases where schedules were exceeded was at the stops themselves.  
 
-The widgets can not be displayed directly from the repository because of processing of html files by GitHub.  However, there is a .zip archive that can be downloaded, along with the RStudio .nb.html files.
+### We then created scripts and functions to visualise the stops and associated delays with respect to the number of delays greater than an arbitrary threshold, over the course of 52 weeks. These were output as Leaflet javascript map widgets.
 
 The map widgets have mouse-over labels that indicate the name of the tram or bus stop and the number of delays that occurred over 52 weeks.  Currently, data for only one direction are shown, and with a threshold of 1.5 minutes.
 
@@ -29,6 +29,9 @@ The map widgets have mouse-over labels that indicate the name of the tram or bus
 
 [Line 72](https://rawgit.com/OpenDataDayZurich2016/visualization_delays/master/html_map_widgets_and_report/line_72.html)
 
+### Additional lines or delays in the opposite direction could easily be visualised with simple code modification.
+
+#### ===============================================================
 
 ### Modifications
 
