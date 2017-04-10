@@ -14,7 +14,7 @@ It is connected to:
 
 The map widgets have mouse-over labels that indicate the name of the tram or bus stop and the number of delays that occurred over 52 weeks.  Currently, data for only one direction are shown, and with a threshold of 1.5 minutes.
 
-[The report]((https://rawgit.com/OpenDataDayZurich2016/visualization_delays/master/html_map_widgets_and_report/map.html)
+[The report](https://rawgit.com/OpenDataDayZurich2016/visualization_delays/master/html_map_widgets_and_report/map.html)
 
 
 ## Interactive Maps of Delay Counts at Stops for Selected Lines
