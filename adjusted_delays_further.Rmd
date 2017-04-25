@@ -268,7 +268,7 @@ test.week <- bind_rows(week1,week20,week30)
 lines.stops <- vector("list",length(unique.lines))
 names(lines.stops) <- as.character(unique.lines)
 for (i in unique.lines){
-  eval(parse(text=paste("stops <- unique(test.week$halt_kurz_von1[which((test.week$linie==",i,")==TRUE)])",sep='')))
+  eval(parse(text=paste("stops <-  unique(test.week$halt_kurz_von1[which((test.week$linie==",i,")==TRUE)])",sep='')))
   lines.stops[[which(names(lines.stops)==as.character(i))]] <- list(stops=stops)
 }
 ```
@@ -297,8 +297,30 @@ for (i in unique.lines) {
   write_csv(data.one,fname)
 }
 ```
+### Create a second set of tables for further development
 ```{r}
+for (i in unique.lines) {
+  stops.1 <- as.character(eval(parse(text=paste("lines.stops[['",i,"']]",sep='')))$stops)
+  print(paste("the numer of stops for line ",i," is ",length(stops.1),sep=''))
+  data.one <- tibble(stops = stops.1,
+                     line = rep(as.character(i),length(stops.1)),
+                     del_1_1 = rep(0,length(stops.1)),
+                     del_1_2 = rep(0,length(stops.1)),
+                     del_2_1 = rep(0,length(stops.1)),
+                     del_2_2 = rep(0,length(stops.1)),
+                     del_3_1 = rep(0,length(stops.1)),
+                     del_3_2 = rep(0,length(stops.1)),
+                     del_4_1 = rep(0,length(stops.1)),
+                     del_4_2 = rep(0,length(stops.1)),
+                     del_5_1 = rep(0,length(stops.1)),
+                     del_5_2 = rep(0,length(stops.1)),
+                     del_6_1 = rep(0,length(stops.1)),
+                     del_6_2 = rep(0,length(stops.1))
+                     )
 
+  fname <- paste("../data/stop_delays2/stops_delays_52_weeks_line_",i,".csv",sep='')
+  write_csv(data.one,fname)
+}
 ```
 
 

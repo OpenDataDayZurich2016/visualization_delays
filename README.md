@@ -50,6 +50,8 @@
 
 <p>09.04.2017  Upload of widgets, README.md</p>
 
+<p>25.04.2017  Update widgets, code and report to reflect fix of calculation of delay, to exclude elapsed time at stop that occurs if the vehicle arrives early at the stop.</p>
+
 <p>Files with .np.html can be imported into RStudio for further work</p>
 
 <p>The raw delay data are available <a href="https://data.stadt-zuerich.ch/dataset?sort=score+desc%2C+metadata_modified+desc&amp;tags=vbz">here</a></p>

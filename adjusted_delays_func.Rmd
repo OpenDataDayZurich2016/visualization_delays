@@ -46,13 +46,12 @@ delays <- function(small_tib,out_tib,work.line,min_delay_seg_min,min_delay_von_m
          soll_an_von,ist_an_von,halt_punkt_id_von,halt_punkt_id_nach,halt_kurz_von1,halt_kurz_nach1,halt_punkt_diva_von,halt_punkt_diva_nach) %>% 
     filter(linie == work.line) %>%
     
-         #delays during segments of the line
-    
-    mutate(soll_seg = soll_an_nach - soll_ab_von,
+         
+    mutate(soll_seg = soll_an_nach - soll_ab_von,    #delay during segments of the line
          ist_seg = ist_an_nach1 - ist_ab_von,
          delay_seg = soll_seg - ist_seg,
-         # delay at the station
-         soll_at_von = soll_ab_von - soll_an_von,
+         
+         soll_at_von = soll_ab_von - soll_an_von,     # delay at the stop (Haltstelle)
          ist_at_von = ist_ab_von - ist_an_von,
          delay_von = ist_at_von - soll_at_von)
   
@@ -67,7 +66,7 @@ delays <- function(small_tib,out_tib,work.line,min_delay_seg_min,min_delay_von_m
 }
 ```
 
-```{r load_data}
+```{r load_data, cache=TRUE,autodep=TRUE}
 out_tib <- tibble()
 temp=list.files('../data/fahrzeiten_data')
 work.line <- 33
@@ -115,16 +114,19 @@ delays_by_type <- bind_rows(delay.seg1,delay.von1)
 
 ```{r plot_data, include= TRUE, result="TRUE"}
 
-ggplot(data=delays_by_type, aes(x=delay)) +
+plt <- ggplot(data=delays_by_type, aes(x=delay)) +
   geom_histogram(data=subset(delays_by_type,Type_of_value=="stop"),aes(fill=Type_of_value),alpha=0.3,bins=20) +
   geom_histogram(data=subset(delays_by_type,Type_of_value=="seg"),aes(fill=Type_of_value),alpha=0.3,bins=20) +
-  scale_fill_manual(name="Type_of_value", values = c("blue","red"),labels = c("Segments","Stops")) +
+  scale_fill_manual(name="Counts", values = c("blue","red"),labels = c("Segments","Stops")) +
   facet_wrap(~day.of.week, nrow = 3) +
-  ggtitle("Delays At Stops And Along Route Segments, By Day of Week") +
+  ggtitle(" Delays Along Routes, By Day of Week") +
   theme(plot.title = element_text(hjust = 0.5))
   
     
   
+```
+```{r}
+ggsave(filename="delays_routes_stops.png",plot=plt, width = 12.5, height = 8, units = 'cm', dpi=200)
 ```
 
 
