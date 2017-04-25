@@ -50,6 +50,8 @@ The map widgets have mouse-over labels that indicate the name of the tram or bus
 
 09.04.2017  Upload of widgets, README.md
 
+25.04.2017  Update widgets, code and report to reflect fix of calculation of delay, to exclude elapsed time at stop that occurs if the vehicle arrives early at the stop.
+
 Files with .np.html can be imported into RStudio for further work
 
 The raw delay data are available [here](https://data.stadt-zuerich.ch/dataset?sort=score+desc%2C+metadata_modified+desc&tags=vbz)
