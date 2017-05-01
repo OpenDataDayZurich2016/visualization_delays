@@ -13,9 +13,9 @@
 
 <p><img src="https://github.com/OpenDataDayZurich2016/visualization_delays/blob/master/delays_route_33.png" alt="Delays at stops and along segments" title=""></p>
 
-<h3>We used QGIS to create a graphic that displays the relative counts of delays at stops and along route segments for Route 33.</h3>
+<p>We used QGIS to create a graphic that displays the relative counts of delays at stops and along route segments for Route 33.   </p>
 
-<h3>We then created scripts and functions to visualise the stops and associated delays with respect to the number of delays greater than an arbitrary threshold, over the course of 52 weeks, the week of 20.09.2015 to the week of 11.09.2016. These were output as Leaflet javascript map widgets.</h3>
+<p>We then created scripts and functions to visualise the stops and associated delays with respect to the number of delays greater than an arbitrary threshold, over the course of 52 weeks, the week of 20.09.2015 to the week of 11.09.2016. These were output as Leaflet javascript map widgets.</p>
 
 <p>The map widgets have mouse-over labels that indicate the name of the tram or bus stop and the number of delays that occurred over the 52 weeks.  Currently, data for only one direction are shown, and with a minimum delay threshold of 1 minute.</p>
 
