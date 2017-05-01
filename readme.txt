@@ -1,22 +1,24 @@
 Visualization of Delays in Verkehrsbetriebe Zürich (VBZ) Data
 =============================================================
 
-This repository collects code that was begun at ODD 2017 Zürich and has undergone subsequent elaboration and developement.
+This repository collects code that was begun at ODD 2017 Zürich and has undergone subsequent elaboration and development.
 
 It is connected to:
 
 * [Issue #11 Visualisation of vehicle delays](https://github.com/OpenDataDayZurich2016/ideas/issues/11) and
 * [Issue #2 Visualization (map) of delay-causing streets](https://github.com/OpenDataDayZurich2016/ideas/issues/2)
 
-### There are two ways that delays can accumulate during the course of a vehicle’s trip on a route.  A delay can occur between stops, or a delay can occur at a stop.  We plotted the frequency of cases where the scheduled time between stops and the scheduled time at stops was exceeded by more than 1.5 minutes.  We found that the vast majority of cases where schedules were exceeded was at the stops themselves.
+### There are two ways that delays can accumulate during the course of a vehicle’s trip on a route.  A delay can occur between stops, or a delay can occur at a stop.  As a hack-a-thon activity we plotted for Route 33 the frequency of cases where the scheduled time between stops and the scheduled time at stops was exceeded by more than 2 minutes.  We found that the vast majority of cases where schedules were exceeded was along the route, between stops.
 
-![Delays at stops and along segments](https://github.com/OpenDataDayZurich2016/visualization_delays/blob/master/delays_routes_stops.png)   
+![Delays at stops and along segments](https://github.com/OpenDataDayZurich2016/visualization_delays/blob/master/delays_route_33.png)
+
+### We used QGIS to create a graphic that displays the relative counts of delays at stops and along route segments for Route 33.   
 
 ### We then created scripts and functions to visualise the stops and associated delays with respect to the number of delays greater than an arbitrary threshold, over the course of 52 weeks, the week of 20.09.2015 to the week of 11.09.2016. These were output as Leaflet javascript map widgets.
 
-The map widgets have mouse-over labels that indicate the name of the tram or bus stop and the number of delays that occurred over the 52 weeks.  Currently, data for only one direction are shown, and with a threshold of 1 minutes.
+The map widgets have mouse-over labels that indicate the name of the tram or bus stop and the number of delays that occurred over the 52 weeks.  Currently, data for only one direction are shown, and with a minimum delay threshold of 1 minute.
 
-[The report](https://rawgit.com/OpenDataDayZurich2016/visualization_delays/master/html_map_widgets_and_report/map.html)
+[The report on the html map widget exercise](https://rawgit.com/OpenDataDayZurich2016/visualization_delays/master/html_map_widgets_and_report/map.html)
 
 
 ## Interactive Maps of Delay Counts at Stops for Selected Lines
@@ -51,6 +53,8 @@ The map widgets have mouse-over labels that indicate the name of the tram or bus
 09.04.2017  Upload of widgets, README.md
 
 25.04.2017  Update widgets, code and report to reflect fix of calculation of delay, to exclude elapsed time at stop that occurs if the vehicle arrives early at the stop.
+
+1.05.2017 Correct the README.md graphic of delay counts for Route 33. Corrected adjusted_delays_func.Rmd so that delays for Route 33 stops and along segments are both positive values. 
 
 Files with .np.html can be imported into RStudio for further work
 
