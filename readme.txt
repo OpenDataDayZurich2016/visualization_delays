@@ -25,6 +25,8 @@ The map widgets have mouse-over labels that indicate the name of the tram or bus
 
 [The report on the html map widget exercise](https://rawgit.com/OpenDataDayZurich2016/visualization_delays/master/html_map_widgets_and_report/map.html)
 
+—- Peter B. Pearman, Thomas Roth, and the Delay Visualization Team
+
 
 ## Interactive Maps of Delay Counts at Stops for Selected Lines
 

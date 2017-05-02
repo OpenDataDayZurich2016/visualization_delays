@@ -25,6 +25,8 @@
 
 <p><a href="https://rawgit.com/OpenDataDayZurich2016/visualization_delays/master/html_map_widgets_and_report/map.html">The report on the html map widget exercise</a></p>
 
+<p>—- Peter B. Pearman, Thomas Roth, and the Delay Visualization Team</p>
+
 <h2>Interactive Maps of Delay Counts at Stops for Selected Lines</h2>
 
 <p><a href="https://rawgit.com/OpenDataDayZurich2016/visualization_delays/master/html_map_widgets_and_report/line_2.html">Line 2</a></p>
