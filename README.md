@@ -60,7 +60,9 @@
 
 <p>25.04.2017  Update widgets, code and report to reflect fix of calculation of delay, to exclude elapsed time at stop that occurs if the vehicle arrives early at the stop.</p>
 
-<p>1.05.2017 Correct the README.md graphic of delay counts for Route 33. Corrected adjusted<em>delays</em>func.Rmd so that delays for Route 33 stops and along segments are both positive values. </p>
+<p>1.05.2017 Correct the README.md graphic of delay counts for Route 33. Corrected adjusted_delays_func.Rmd so that delays for Route 33 stops and along segments are both positive values. </p>
+
+<p>2.05.2017 Update readme files and add QGIS PNG files.</p>
 
 <p>Files with .np.html can be imported into RStudio for further work</p>
 

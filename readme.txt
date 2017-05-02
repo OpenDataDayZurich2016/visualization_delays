@@ -61,7 +61,9 @@ The map widgets have mouse-over labels that indicate the name of the tram or bus
 
 25.04.2017  Update widgets, code and report to reflect fix of calculation of delay, to exclude elapsed time at stop that occurs if the vehicle arrives early at the stop.
 
-1.05.2017 Correct the README.md graphic of delay counts for Route 33. Corrected adjusted_delays_func.Rmd so that delays for Route 33 stops and along segments are both positive values. 
+1.05.2017 Correct the README.md graphic of delay counts for Route 33. Corrected adjusted\_delays\_func.Rmd so that delays for Route 33 stops and along segments are both positive values. 
+
+2.05.2017 Update readme files and add QGIS PNG files.
 
 Files with .np.html can be imported into RStudio for further work
 
