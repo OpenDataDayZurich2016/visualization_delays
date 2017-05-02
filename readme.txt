@@ -12,7 +12,7 @@ It is connected to:
 
 We used QGIS to create a graphic that displays the relative counts of delays at stops and along route segments for Route 33. The two directions are shown by the split down the middle of each segment, with width proportional to the number of delays, regardless of their duration. This was the product for our work during during the hack-a-thon itself.
 
-![QGIS graphic](https://github.com/OpenDataDayZurich2016/visualization_delays/blob/master/delay_gains_route_33_QGIS.png)
+![QGIS graphic](https://github.com/OpenDataDayZurich2016/visualization_delays/blob/master/delay_gains_route_33_QGIS_annotated.png)
 
 Subsequently we continued to expand the analysis. We set a minimum delay of one minute and examined the frequencies of delays of different lengths, as they arose at both stops and along segments. For Route 33, which is a trolly bus, it was not surprising that delays along route segments were relatively more frequent than delays at stops, and that this trend was reversed on Sundays, when there is likely much less vehicular traffic in the city.
 
