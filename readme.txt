@@ -10,16 +10,18 @@ It is connected to:
 
 ### There are two ways that delays can accumulate during the course of a vehicle’s trip on a route.  A delay can occur between stops, or a delay can occur at a stop.  As a hack-a-thon activity we plotted for Route 33 the frequency of cases where the scheduled time between stops and the scheduled time at stops was exceeded by more than 2 minutes.  We found that the vast majority of cases where schedules were exceeded was along the route, between stops.
 
-We used QGIS to create a graphic that displays the relative counts of delays at stops and along route segments for Route 33. The two directions are shown by the split down the middle of each segment, with width proportional to the number of delays, regardless of their duration.
+We used QGIS to create a graphic that displays the relative counts of delays at stops and along route segments for Route 33. The two directions are shown by the split down the middle of each segment, with width proportional to the number of delays, regardless of their duration. This was the product for our work during during the hack-a-thon itself.
 
 ![QGIS graphic](https://github.com/OpenDataDayZurich2016/visualization_delays/blob/master/delay_gains_route_33_QGIS.png)
+
+Subsequently we continued to expand the analysis. We set a minimum delay of one minute and examined the frequencies of delays of different lengths, as they arose at both stops and along segments. For Route 33, which is a trolly bus, it was not surprising that delays along route segments were relatively more frequent than delays at stops, and that this trend was reversed on Sundays, when there is likely much less vehicular traffic in the city.
 
 ![Delays at stops and along segments](https://github.com/OpenDataDayZurich2016/visualization_delays/blob/master/delays_route_33.png)
    
 
 We then created scripts and functions to visualise the stops and associated delays with respect to the number of delays greater than an arbitrary threshold, over the course of 52 weeks, the week of 20.09.2015 to the week of 11.09.2016. These were output as Leaflet javascript map widgets.
 
-The map widgets have mouse-over labels that indicate the name of the tram or bus stop and the number of delays that occurred over the 52 weeks.  Currently, data for only one direction are shown, and with a minimum delay threshold of 1 minute.
+The map widgets have mouse-over labels that indicate the name of the tram or bus stop and the number of delays that occurred over the 52 weeks.  Currently, data for only one direction are shown, and with a minimum delay threshold of 1 minute. These are shown below, and in a separate report that was generated from the RStudio file.
 
 [The report on the html map widget exercise](https://rawgit.com/OpenDataDayZurich2016/visualization_delays/master/html_map_widgets_and_report/map.html)
 
