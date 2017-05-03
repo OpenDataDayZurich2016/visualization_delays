@@ -65,6 +65,8 @@ The map widgets have mouse-over labels that indicate the name of the tram or bus
 
 2.05.2017 Update readme files and add QGIS PNG files.
 
+3.05.2017 Update ready files, add scale bar to map widgets and replace all
+
 Files with .np.html can be imported into RStudio for further work
 
 The raw delay data are available [here](https://data.stadt-zuerich.ch/dataset?sort=score+desc%2C+metadata_modified+desc&tags=vbz)

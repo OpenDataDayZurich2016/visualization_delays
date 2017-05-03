@@ -64,6 +64,8 @@
 
 <p>2.05.2017 Update readme files and add QGIS PNG files.</p>
 
+<p>3.05.2017 Update ready files, add scale bar to map widgets and replace all</p>
+
 <p>Files with .np.html can be imported into RStudio for further work</p>
 
 <p>The raw delay data are available <a href="https://data.stadt-zuerich.ch/dataset?sort=score+desc%2C+metadata_modified+desc&amp;tags=vbz">here</a></p>

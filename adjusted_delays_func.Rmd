@@ -1,13 +1,15 @@
 ---
 title: "VBZ Delays Extraction"
-output: html_notebook
+output:
+  html_document: default
+  html_notebook: default
 ---
 
 ```{r global_options, include=TRUE}
 knitr::opts_chunk$set(include = TRUE)
 ```
 
-```{r}
+```{r message=FALSE}
 library(tidyverse)
 library(lubridate)
 ```
@@ -49,7 +51,7 @@ delays <- function(small_tib,out_tib,work.line,min_delay_seg_min,min_delay_von_m
          
     mutate(soll_seg = soll_an_nach - soll_ab_von,    #delay during segments of the line
          ist_seg = ist_an_nach1 - ist_ab_von,
-         delay_seg = soll_seg - ist_seg,
+         delay_seg =  ist_seg - soll_seg,
          
          soll_at_von = soll_ab_von - soll_an_von,     # delay at the stop (Haltstelle)
          ist_at_von = ist_ab_von - ist_an_von,
@@ -58,7 +60,7 @@ delays <- function(small_tib,out_tib,work.line,min_delay_seg_min,min_delay_von_m
         # now filter out lines that do not have at least one delay that is greater than the necessary minimum
 
   delay3 <- delay2 %>%
-    mutate(delay_seg_min = floor(delay_seg/60), delay_von_min = floor(delay_von/60)) %>%
+    mutate(delay_seg_min = delay_seg/60, delay_von_min = delay_von/60) %>%
     filter(delay_seg_min >= min_delay_seg_min | delay_von_min >= min_delay_von_min)
   
   out_tib <- bind_rows(delay3,out_tib)
@@ -67,14 +69,18 @@ delays <- function(small_tib,out_tib,work.line,min_delay_seg_min,min_delay_von_m
 ```
 
 ```{r load_data, cache=TRUE,autodep=TRUE}
+#Note: if the min_delay_seg_min and min_delay_von_min are both set to 0, then you will get 10s of thousands of
+# delays that are less than one minute, even with just 12 weeks of data from line 33.  You will have to filter
+# to be able to make reasonable histograms.
+
 out_tib <- tibble()
 temp=list.files('../data/fahrzeiten_data')
 work.line <- 33
 data_set=0
 num_datasets = 12
-min_delay_seg_min = 2
-min_delay_von_min = 2
-out_tib <- tibble()
+min_delay_seg_min = 0
+min_delay_von_min = 0
+
 for (i in temp){
   data_set <- data_set + 1
   print(i)
@@ -87,8 +93,8 @@ out_tib$index <- paste(out_tib$linie,'-',out_tib$halt_punkt_id_von,'-',out_tib$h
 ```
 
 ```{r}
-#name<-"week1-2.csv"
-#write_csv(out_tib,name)
+name<-"week1-2a.csv"
+write_csv(out_tib,name)
 ```
 
 ```{r calculate_day_of_week}
@@ -109,26 +115,317 @@ delay.von1 <- out_tib %>%
         mutate(type_val = "stop") %>%
         rename(delay = delay_von_min,Type_of_value = type_val)
 
-delays_by_type <- bind_rows(delay.seg1,delay.von1)
+delays_by_type_raw <- bind_rows(delay.seg1,delay.von1) %>% filter(!halt_kurz_von1 %in% c('DEP2','DEP4','DEP7','DEP8','GAR6','FRAF07'))
 ```
+
+```{r}
+test <- delays_by_type_raw %>%
+          filter(delay >0)
+min(test$delay)
+```
+
+
+
+
+```{r mean_delay_by_seg}
+test <- delays_by_type_raw %>%
+        filter(Type_of_value =="seg") %>%
+        group_by(index) %>%
+        summarize(mean_delay=mean(delay),median_delay=median(delay))
+print("maximum of median delay across segments")
+max(test$median_delay)
+print("maximum of mean delay across segments")
+max(test$mean_delay)
+```
+
+```{r mean_delay_by_stop}
+test <- delays_by_type_raw %>%
+        filter(Type_of_value =="stop") %>%
+        group_by(index) %>%
+        summarize(mean_delay=mean(delay), median_delay=median(delay),num_delays=n())
+print("maximum average delay across stops")
+max(test$mean_delay)
+print("maximum median delay across stops")
+max(test$median_delay)
+```
+
+
+
+```{r}
+test <- delays_by_type_raw %>%
+        filter(Type_of_value =="seg") %>%
+        group_by(delay) %>%
+        summarize(num_delays=n())
+print("number of seg delays > 1min")
+sum(test$num_delays)
+```
+```{r}
+test <- delays_by_type_raw %>%
+        filter(Type_of_value =="seg",delay > 8) %>%
+        group_by(delay) %>%
+        summarize(num_delays=n())
+paste("number of seg delays > 8min is ",sum(test$num_delays),sep="")
+sum(test$num_delays)
+paste("number of seg delays > 8min, as proportion, is ",sum(test$num_delays)/7614,sep="")
+
+```
+
+```{r}
+test <- delays_by_type_raw %>%
+        filter(Type_of_value =="stop") %>%
+        group_by(delay) %>%
+        summarize(num_delays=n())
+print("number of stop delays > 1min")
+sum(test$num_delays)
+```
+
+```{r}
+test <- delays_by_type_raw %>%
+        filter(Type_of_value =="stop",delay > 8) %>%
+        group_by(delay) %>%
+        summarize(num_delays=n())
+paste("number of stop delays > 8 min is ",sum(test$num_delays),sep="")
+sum(test$num_delays)
+paste("number of stop delays > 8 min, as proportion, is ",sum(test$num_delays)/3210,sep="")
+```
+
+
+
+
 
 ```{r plot_data, include= TRUE, result="TRUE"}
 
+delays_by_type <- delays_by_type_raw %>%
+                  filter(delay <= 8 & delay > 0)
+
 plt <- ggplot(data=delays_by_type, aes(x=delay)) +
+  geom_histogram(data=subset(delays_by_type,Type_of_value=="stop"),aes(fill=Type_of_value),alpha=0.3,binwidth = 1, boundary=0) +
+  geom_histogram(data=subset(delays_by_type,Type_of_value=="seg"), aes(fill=Type_of_value),alpha=0.3,binwidth = 1, boundary=0) +
+  scale_y_continuous(minor_breaks=NULL)+
+  scale_fill_manual(name="Counts", values = c("blue","red"),labels = c("Segments","Stops")) +
+  facet_wrap(~day.of.week, nrow = 3) +
+  ggtitle(" Delays on Route 33, By Day of Week") +
+  theme(plot.title = element_text(hjust = 0.5,size = 14)) +
+  labs(x = "Delay in Minutes",y = "Number Delays in 12 Weeks")+
+  theme(axis.title = element_text(size = 10))+
+  theme(axis.text.x = element_text(colour="black",size = 6))+
+  theme(axis.text.y = element_text(colour="black",size = 6))
+  
+  
+#breaks=seq(1.5,20.5,1),
+```
+
+```{r}
+# from http://stackoverflow.com/questions/34533472/insert-blanks-into-a-vector-for-e-g-minor-tick-labels-in-r
+every_nth <- function(x, nth, empty = TRUE, inverse = FALSE) 
+  {
+  if (!inverse) {
+    if(empty) {
+      x[1:nth == 1] <- ""
+      x
+      } else {
+        x[1:nth != 1]
+        }
+    } else {
+      if(empty) {
+        x[1:nth != 1] <- ""
+        x
+        } else {
+          x[1:nth == 1]
+        }
+    }
+}
+```
+
+
+
+```{r}
+test <- delays_by_type %>%
+        filter(Type_of_value =="stop") %>%
+        group_by(delay) %>%
+        summarize(num_delays=n())
+sum(test$num_delays)
+```
+
+```{r}
+names(delays_by_type)
+```
+
+
+
+
+```{r}
+custom_breaks <- seq(0,8)
+plt <- plt + scale_x_continuous(breaks=custom_breaks, minor_breaks = NULL,
+                labels=every_nth(custom_breaks,2,inverse=TRUE)) +
+                labs(caption = "All delays")+
+                theme(plot.caption = element_text(size = 8))+
+                expand_limits(x=0,y=c(0,60000))
+                
+plt
+```
+
+
+```{r}
+ggsave(filename="delays_route_33_all.png",plot=plt, width = 12.5, height = 10, units = 'cm', dpi=200)
+```
+
+```{r}
+# This plot is of data from which the stops associated with depos are removed
+
+delays_by_type2 <- delays_by_type %>%
+                    filter(!halt_kurz_von1 %in% c('DEP2','DEP4','DEP7','DEP8','GAR6','FRAF07'))
+
+plt <- ggplot(data=delays_by_type2, aes(x=delay)) +
   geom_histogram(data=subset(delays_by_type,Type_of_value=="stop"),aes(fill=Type_of_value),alpha=0.3,bins=20) +
   geom_histogram(data=subset(delays_by_type,Type_of_value=="seg"),aes(fill=Type_of_value),alpha=0.3,bins=20) +
   scale_fill_manual(name="Counts", values = c("blue","red"),labels = c("Segments","Stops")) +
   facet_wrap(~day.of.week, nrow = 3) +
-  ggtitle(" Delays Along Routes, By Day of Week") +
-  theme(plot.title = element_text(hjust = 0.5))
+  ggtitle(" Delays on Route 33, By Day of Week") +
+  theme(plot.title = element_text(hjust = 0.5,size = 14)) +
+  labs(x = "Delay in Minutes",y = "Number Delays in 12 Weeks")+
+  theme(axis.title = element_text(size = 10))+
+  theme(axis.text.x = element_text(colour="black",size = 6))+
+  theme(axis.text.y = element_text(colour="black",size = 6))
   
-    
+
+custom_breaks <- seq(1,20)
+plt <- plt + scale_x_continuous(breaks=custom_breaks,minor_breaks = NULL,
+                labels=every_nth(custom_breaks,2,inverse=TRUE))
   
+plt    
 ```
+
+
+
+
+Make a new graph without early arrivals
+
+
+
+
+
 ```{r}
-ggsave(filename="delays_routes_stops.png",plot=plt, width = 12.5, height = 8, units = 'cm', dpi=200)
+
+delays <- function(small_tib,out_tib,work.line,min_delay_seg_min,min_delay_von_min){
+  small_tib$halt_kurz_nach1 <- as.character(small_tib$halt_kurz_nach1)
+  small_tib$halt_kurz_von1 <- as.character(small_tib$halt_kurz_von1)
+  delay2 <- small_tib %>% 
+    select(linie,umlauf_von,halt_id_nach,halt_id_von,datum_von,soll_ab_von,ist_ab_von,soll_an_nach,ist_an_nach1,
+         soll_an_von,ist_an_von,halt_punkt_id_von,halt_punkt_id_nach,halt_kurz_von1,halt_kurz_nach1,halt_punkt_diva_von,halt_punkt_diva_nach) %>% 
+    filter(linie == work.line) %>%
+    
+         
+    mutate(soll_seg = soll_an_nach - soll_ab_von,    #delay during segments of the line
+         ist_seg = ist_an_nach1 - ist_ab_von,
+         delay_seg =  ist_seg - soll_seg,
+         
+         soll_at_von = soll_ab_von - soll_an_von,     # delay at the stop (Haltstelle)
+         arrival_von =  (soll_at_von - ist_an_von),  # positive values signify early arrival
+         ist_at_von = ist_ab_von - ist_an_von,
+         delay_von = ist_at_von - soll_at_von)
+  
+  delay3 <- delay2 %>%    
+        mutate(zufrueh = sapply(delay2$arrival_von,function(x) ifelse(x<0,0,x),simplify=TRUE),
+               delay_von_min = (ist_at_von - soll_at_von - zufrueh)/60)
+  
+        # now filter out lines that do not have at least one delay that is greater than the necessary minimum
+
+  delay4 <- delay3 %>%
+    mutate(delay_seg_min = delay_seg/60, delay_von_min = delay_von/60) %>%
+    filter(delay_seg_min >= min_delay_seg_min | delay_von_min >= min_delay_von_min)
+  
+  out_tib <- bind_rows(delay4,out_tib)
+  return(out_tib)
+}
+```
+
+
+```{r load_data2, cache=TRUE,autodep=TRUE}
+#Note: if the min_delay_seg_min and min_delay_von_min are both set to 0, then you will get 10s of thousands of
+# delays that are less than one minute, even with just 12 weeks of data from line 33.  You will have to filter
+# to be able to make reasonable histograms.
+
+out_tib <- tibble()
+temp=list.files('../data/fahrzeiten_data')
+work.line <- 33
+data_set=0
+num_datasets = 12
+min_delay_seg_min = 0
+min_delay_von_min = 0
+
+for (i in temp){
+  data_set <- data_set + 1
+  print(i)
+  delay1 <- read.csv(paste('../data/fahrzeiten_data/',i,sep=""),stringsAsFactors = FALSE)
+  out_tib <- delays(small_tib=delay1,out_tib,work.line,min_delay_seg_min,min_delay_von_min)
+  if ((data_set>=num_datasets)==TRUE) break()
+}
+# make an index for QGIS plotting
+out_tib$index <- paste(out_tib$linie,'-',out_tib$halt_punkt_id_von,'-',out_tib$halt_punkt_id_nach,sep='')
+```
+
+```{r calculate_day_of_week_2}
+out_tib$day.of.week <- factor(weekdays(as.POSIXct(out_tib$soll_ab_von,origin=dmy(out_tib$datum_von))),levels=c("Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"))
 ```
 
 
 
+```{r make_output_data_for_graphing2}
+delay.seg1 <- out_tib %>%
+        #select(delay_seg_min) %>%
+        filter(delay_seg_min >= min_delay_seg_min) %>%
+        mutate(type_val = "seg") %>%
+        rename(delay = delay_seg_min, Type_of_value=type_val)
+
+delay.von1 <- out_tib %>%
+        #select(delay_von_min) %>%
+        filter(delay_von_min >= min_delay_von_min) %>%
+        mutate(type_val = "stop") %>%
+        rename(delay = delay_von_min,Type_of_value = type_val)
+
+delays_by_type_raw <- bind_rows(delay.seg1,delay.von1) %>% filter(!halt_kurz_von1 %in% c('DEP2','DEP4','DEP7','DEP8','GAR6','FRAF07'))
+```
+
+
+
+
+
+
+```{r plot_data2, include= TRUE, result="TRUE"}
+
+delays_by_type <- delays_by_type_raw %>%
+                  filter(delay <= 8 & delay > 1)
+
+plt <- ggplot(data=delays_by_type, aes(x=delay)) +
+  geom_histogram(data=subset(delays_by_type,Type_of_value=="stop"),aes(fill=Type_of_value),alpha=0.3,binwidth = 1, boundary=0) +
+  geom_histogram(data=subset(delays_by_type,Type_of_value=="seg"), aes(fill=Type_of_value),alpha=0.3,binwidth = 1, boundary=0) +
+  scale_y_continuous(minor_breaks=NULL)+
+  scale_fill_manual(name="Counts", values = c("blue","red"),labels = c("Segments","Stops")) +
+  facet_wrap(~day.of.week, nrow = 3) +
+  ggtitle(" Delays on Route 33, By Day of Week") +
+  theme(plot.title = element_text(hjust = 0.5,size = 14)) +
+  labs(x = "Delay in Minutes",y = "Number Delays in 12 Weeks")+
+  theme(axis.title = element_text(size = 10))+
+  theme(axis.text.x = element_text(colour="black",size = 6))+
+  theme(axis.text.y = element_text(colour="black",size = 6))
+  
+  
+#breaks=seq(1.5,20.5,1),
+```
+
+```{r}
+custom_breaks <- seq(0,8)
+plt <- plt + scale_x_continuous(breaks=custom_breaks, minor_breaks = NULL,
+                labels=every_nth(custom_breaks,2,inverse=TRUE)) +
+                labs(caption = "Delays greater than 1 minute")+
+                theme(plot.caption = element_text(size = 8))+
+                expand_limits(x=0) #,y=c(0,1000))
+                
+plt
+```
+
+```{r}
+ggsave(filename="delays_route_33_no_early.png",plot=plt, width = 12.5, height = 10, units = 'cm', dpi=200)
+```
 
