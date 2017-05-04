@@ -67,6 +67,8 @@ The map widgets have mouse-over labels that indicate the name of the tram or bus
 
 3.05.2017 Update ready files, add scale bar to map widgets and replace all
 
+4.05.2017 Add R User Group ‘Hackathon Flashback’ ppt presentation
+
 Files with .np.html can be imported into RStudio for further work
 
 The raw delay data are available [here](https://data.stadt-zuerich.ch/dataset?sort=score+desc%2C+metadata_modified+desc&tags=vbz)
@@ -75,13 +77,17 @@ The raw delay data are available [here](https://data.stadt-zuerich.ch/dataset?so
 
 ### Code guide
 
-adjusted\_delays\_func.nb.html executes an initial analysis to compare the frequency of delays at stops and along segments between stops.
+adjusted\_delays\_func.nb.html executes an initial analysis to compare the frequency of delays at stops and along segments between stops.  This file is messy because it was used for many small, ad hoc inquiries regarding data characteristics.
 
-adjusted\_delays\_further.nb.html executes additional code to construct .csv files for each route. 
+adjusted\_delays\_further.nb.html executes additional code to construct .csv files for each route. This executes slowly because of the sapply function to remove delay time due to early arrival of vehicles.  This could be removed (or go to an earlier commit) because there were very few early arrivals.
 
-adjusted\_stop\_delays.nb.html tallies the number of delays during 52 weeks of data, for thresholds of 1.5, 2, 3, 4, 5, and 6 minutes or more.  It also extracts all stops from the available data files from three years, and joins coordinate data for each stop appropriately.
+adjusted\_stop\_delays.nb.html tallies the number of delays during 52 weeks of data, for thresholds of 1.5, 2, 3, 4, 5, and 6 minutes or more.  It also extracts all stops from the available data files from three years, and joins coordinate data for each stop appropriately. Actual threshold in the code should be checked carefully because these have often been changed.
 
 map.nb.html reads the files constructed by the previous script and creates Leaflet html map widgets for several selected tram and bus lines.
+
+.Rmd files can be used if rendered versions are not required.
+
+Questions? Contact Peter Pearman pbpearman@gmail.com
 
 html\_map\_widgets\_and\_report.zip has obvious contents
 

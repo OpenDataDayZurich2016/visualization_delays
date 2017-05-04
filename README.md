@@ -66,6 +66,8 @@
 
 <p>3.05.2017 Update ready files, add scale bar to map widgets and replace all</p>
 
+<p>4.05.2017 Add R User Group ‘Hackathon Flashback’ ppt presentation</p>
+
 <p>Files with .np.html can be imported into RStudio for further work</p>
 
 <p>The raw delay data are available <a href="https://data.stadt-zuerich.ch/dataset?sort=score+desc%2C+metadata_modified+desc&amp;tags=vbz">here</a></p>
@@ -74,12 +76,16 @@
 
 <h3>Code guide</h3>
 
-<p>adjusted_delays_func.nb.html executes an initial analysis to compare the frequency of delays at stops and along segments between stops.</p>
+<p>adjusted_delays_func.nb.html executes an initial analysis to compare the frequency of delays at stops and along segments between stops.  This file is messy because it was used for many small, ad hoc inquiries regarding data characteristics.</p>
 
-<p>adjusted_delays_further.nb.html executes additional code to construct .csv files for each route. </p>
+<p>adjusted_delays_further.nb.html executes additional code to construct .csv files for each route. This executes slowly because of the sapply function to remove delay time due to early arrival of vehicles.  This could be removed (or go to an earlier commit) because there were very few early arrivals.</p>
 
-<p>adjusted_stop_delays.nb.html tallies the number of delays during 52 weeks of data, for thresholds of 1.5, 2, 3, 4, 5, and 6 minutes or more.  It also extracts all stops from the available data files from three years, and joins coordinate data for each stop appropriately.</p>
+<p>adjusted_stop_delays.nb.html tallies the number of delays during 52 weeks of data, for thresholds of 1.5, 2, 3, 4, 5, and 6 minutes or more.  It also extracts all stops from the available data files from three years, and joins coordinate data for each stop appropriately. Actual threshold in the code should be checked carefully because these have often been changed.</p>
 
 <p>map.nb.html reads the files constructed by the previous script and creates Leaflet html map widgets for several selected tram and bus lines.</p>
+
+<p>.Rmd files can be used if rendered versions are not required.</p>
+
+<p>Questions? Contact Peter Pearman pbpearman@gmail.com</p>
 
 <p>html_map_widgets_and_report.zip has obvious contents</p>
